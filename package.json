@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
     "@builderbot/bot": "^1.3.15",

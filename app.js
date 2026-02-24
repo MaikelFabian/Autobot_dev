@@ -19,7 +19,6 @@ try {
 let lastQR = null;
 let lastQrPng = null;
 let lastQrAt = null;
-let lastInstructions = null;
 let connected = false;
 
 const startQRServer = () => {
@@ -30,74 +29,24 @@ const startQRServer = () => {
       const status = connected
         ? "✅ Dispositivo conectado"
         : lastQR
-        ? "📷 Escanea el QR para conectar"
-        : "⏳ Esperando QR...";
-      const repoUrl = process.env.REPO_URL || "";
-      const version = process.env.APP_VERSION || process.env.RAILWAY_GIT_COMMIT_SHA || "";
-      const instructionsHtml =
-        !connected && Array.isArray(lastInstructions) && lastInstructions.length
-          ? `<h2>Instrucciones</h2><pre style="text-align:left;white-space:pre-wrap;background:#f5f5f5;padding:12px;border-radius:8px">${lastInstructions
-              .map((s) =>
-                String(s)
-                  .replaceAll("&", "&amp;")
-                  .replaceAll("<", "&lt;")
-                  .replaceAll(">", "&gt;")
-              )
-              .join("\n")}</pre>`
-          : "";
+          ? "📷 Escanea el QR para conectar"
+          : "⏳ Esperando QR...";
       const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Autobot QR</title>
-      <style>
-        body{font-family:system-ui,Segoe UI,Arial;padding:20px;max-width:760px;margin:0 auto;text-align:center}
-        img{max-width:320px}
-        code{display:inline-block;background:#f5f5f5;padding:6px 8px;border-radius:6px}
-        .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
-        .btn{appearance:none;border:1px solid #ddd;background:#111;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-        .btn.secondary{background:#fff;color:#111}
-        .card{background:#fafafa;border:1px solid #eee;border-radius:14px;padding:14px;margin:14px 0}
-        .meta{color:#555;font-size:14px}
-      </style>
+      <style>body{font-family:system-ui,Segoe UI,Arial;padding:20px;max-width:700px;margin:0 auto;text-align:center}img{max-width:320px}code{display:inline-block;background:#f5f5f5;padding:6px 8px;border-radius:6px}</style>
       <meta http-equiv="refresh" content="5"></head><body>
       <h1>Autobot – QR de conexión</h1>
-      <div class="meta">
-        <div>${status}${lastQrAt ? " • " + new Date(lastQrAt).toLocaleString() : ""}</div>
-        ${
-          version
-            ? `<div>Versión: <code>${String(version)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")}</code></div>`
-            : ""
-        }
-        ${
-          repoUrl
-            ? `<div>Repo: <a href="${String(repoUrl)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")}" target="_blank" rel="noreferrer">${String(repoUrl)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")}</a></div>`
-            : ""
-        }
-      </div>
-      <div class="row">
-        <button class="btn" onclick="location.reload()">Actualizar</button>
-        <a class="btn secondary" href="/status">Ver status</a>
-      </div>
-      <div class="card">
+      <p>${status}${lastQrAt ? " • " + new Date(lastQrAt).toLocaleString() : ""}</p>
       ${
         connected
           ? "<p>El bot ya está conectado a WhatsApp.</p>"
           : lastQR
-          ? QRImageLib
-            ? '<img alt="QR" src="/qr.png"/>'
-            : "<p>Instala el paquete <code>qrcode</code> para ver la imagen del QR.<br/>Contenido del QR:</p><code>" +
-              lastQR +
-              "</code>"
-          : "<p>Sin QR por ahora, recargando...</p>"
+            ? QRImageLib
+              ? '<img alt="QR" src="/qr.png"/>'
+              : "<p>Instala el paquete <code>qrcode</code> para ver la imagen del QR.<br/>Contenido del QR:</p><code>" +
+                lastQR +
+                "</code>"
+            : "<p>Sin QR por ahora, recargando...</p>"
       }
-      </div>
-      ${instructionsHtml}
       <p><small>Esta página se actualiza cada 5 segundos.</small></p>
       </body></html>`;
       res.end(html);
@@ -120,7 +69,7 @@ const startQRServer = () => {
           connected,
           lastQrAt,
           hasQR: !!lastQR,
-        })
+        }),
       );
       return;
     }
@@ -128,7 +77,7 @@ const startQRServer = () => {
     res.end("Not Found");
   });
   server.listen(PORT, () =>
-    console.log(`🌐 Servidor QR escuchando en http://localhost:${PORT}/qr`)
+    console.log(`🌐 Servidor QR escuchando en http://localhost:${PORT}/qr`),
   );
 };
 
@@ -175,7 +124,7 @@ const handleNavigation = async (ctx, { gotoFlow, fallBack }) => {
 
   // Si escribe algo inválido, mensaje de error y volver a intentar
   return fallBack(
-    "⚠️ Opción no válida. Escribe *0* para volver al Menú Principal."
+    "⚠️ Opción no válida. Escribe *0* para volver al Menú Principal.",
   );
 };
 
@@ -200,7 +149,7 @@ const flowOption1 = addKeyword(EVENTS.ACTION)
   .addAnswer(
     "🔙 Escribe *0* para volver al Menú Principal o selecciona otra opción.",
     { capture: true },
-    handleNavigation
+    handleNavigation,
   );
 
 // Opción 2: Refrendación y categorización
@@ -229,13 +178,13 @@ const flowOption2 = addKeyword(EVENTS.ACTION)
       "🔙 Escribe *0* para volver al Menú Principal.",
     ],
     { capture: true },
-    handleNavigation
+    handleNavigation,
   );
 
 // Opción 3: Requisitos para inscribirte
 const flowOption3 = addKeyword(EVENTS.ACTION)
   .addAnswer([
-    "📋 *Opción 4️⃣ – Requisitos para inscribirte*",
+    "📋 *Opción 3️⃣ – Requisitos para inscribirte*",
     "",
     "🧾 *Solo necesitas:*",
     "🚫 No tener multas ni comparendos",
@@ -246,14 +195,14 @@ const flowOption3 = addKeyword(EVENTS.ACTION)
   .addAnswer(
     [
       "👇 *Siguientes opciones:*",
-      "5️⃣ Formas de pago",
-      "6️⃣ Ubicación y Horarios",
-      "7️⃣ Hablar con un asesor",
+      "4️⃣ Formas de pago",
+      "5️⃣ Ubicación y Horarios",
+      "6️⃣ Hablar con un asesor",
       "",
       "🔙 Escribe *0* para volver al Menú Principal.",
     ],
     { capture: true },
-    handleNavigation
+    handleNavigation,
   );
 
 // Opción 4: Formas de pago
@@ -276,7 +225,7 @@ const flowOption4 = addKeyword(EVENTS.ACTION)
       "🔙 Escribe *0* para volver al Menú Principal.",
     ],
     { capture: true },
-    handleNavigation
+    handleNavigation,
   );
 
 // Opción 5: Ubicación y Horarios
@@ -300,7 +249,7 @@ const flowOption5 = addKeyword(EVENTS.ACTION)
       "🔙 Escribe *0* para volver al Menú Principal.",
     ],
     { capture: true },
-    handleNavigation
+    handleNavigation,
   );
 
 // Opción 6: Hablar con un asesor
@@ -450,30 +399,20 @@ const flowWelcome = addKeyword([
       case "6":
         return gotoFlow(flowOption6);
     }
-  }
+  },
 );
 
 const main = async () => {
   console.log("🚀 Iniciando Colombot...");
   startQRServer();
   const adapterDB = new MemoryDB();
-  const PHONE_NUMBER = process.env.PHONE_NUMBER;
   const adapterProvider = createProvider(BaileysProvider, {
     browser: ["Mac OS", "Chrome", "14.4.1"],
-    ...(PHONE_NUMBER
-      ? {
-          usePairingCode: true,
-          phoneNumber: PHONE_NUMBER,
-        }
-      : {}),
-    experimentalStore: true,
-    timeRelease: 10800000,
   });
 
   adapterProvider.on("require_action", (payload) => {
     console.log("⚡ Require Action:", payload);
     const { instructions } = payload;
-    lastInstructions = Array.isArray(instructions) ? instructions : null;
     if (instructions.length) console.log(instructions.join("\n"));
 
     const qr = payload.qr || payload.payload?.qr;
@@ -484,8 +423,7 @@ const main = async () => {
       console.log("📷 Escanea este código QR para conectar:");
       qrcode.generate(qr, { small: true }, (q) => console.log(q));
       if (QRImageLib) {
-        QRImageLib
-          .toBuffer(qr, { type: "png", margin: 2, width: 320 })
+        QRImageLib.toBuffer(qr, { type: "png", margin: 2, width: 320 })
           .then((buf) => {
             lastQrPng = buf;
           })
@@ -500,12 +438,10 @@ const main = async () => {
     connected = true;
     lastQR = null;
     lastQrPng = null;
-    lastInstructions = null;
     console.log("✅ Provider ready");
   });
   adapterProvider.on("auth_failure", () => {
     connected = false;
-    lastInstructions = null;
     console.log("❌ Auth failure");
   });
   adapterProvider.on("message", () => console.log("📩 Message received"));
