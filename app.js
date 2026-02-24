@@ -33,9 +33,10 @@ const startQRServer = () => {
           : "⏳ Esperando QR...";
       const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Autobot QR</title>
       <style>body{font-family:system-ui,Segoe UI,Arial;padding:20px;max-width:700px;margin:0 auto;text-align:center}img{max-width:320px}code{display:inline-block;background:#f5f5f5;padding:6px 8px;border-radius:6px}</style>
-      <meta http-equiv="refresh" content="5"></head><body>
+      </head><body>
       <h1>Autobot – QR de conexión</h1>
-      <p>${status}${lastQrAt ? " • " + new Date(lastQrAt).toLocaleString() : ""}</p>
+      <p id="status">${status}${lastQrAt ? " • " + new Date(lastQrAt).toLocaleString() : ""}</p>
+      <div id="content">
       ${
         connected
           ? "<p>El bot ya está conectado a WhatsApp.</p>"
@@ -47,7 +48,27 @@ const startQRServer = () => {
                 "</code>"
             : "<p>Sin QR por ahora, recargando...</p>"
       }
-      <p><small>Esta página se actualiza cada 5 segundos.</small></p>
+      </div>
+      <p><small>Esta página se actualiza automáticamente.</small></p>
+      <script>
+        setInterval(() => {
+          fetch('/status')
+            .then(r => r.json())
+            .then(data => {
+              if (data.connected) {
+                document.getElementById('content').innerHTML = '<p>El bot ya está conectado a WhatsApp.</p>';
+                document.getElementById('status').textContent = '✅ Dispositivo conectado';
+              } else if (data.hasQR) {
+                fetch('/qr.png').then(() => {
+                  document.getElementById('content').innerHTML = '<img alt="QR" src="/qr.png?t=' + Date.now() + '"/>';
+                  document.getElementById('status').textContent = '📷 Escanea el QR para conectar' + (data.lastQrAt ? ' • ' + new Date(data.lastQrAt).toLocaleString() : '');
+                }).catch(() => {
+                  document.getElementById('status').textContent = '⏳ Esperando QR...';
+                });
+              }
+            });
+        }, 2000);
+      </script>
       </body></html>`;
       res.end(html);
       return;
