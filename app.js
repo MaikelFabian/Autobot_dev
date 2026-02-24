@@ -59,15 +59,19 @@ const startQRServer = () => {
                 document.getElementById('content').innerHTML = '<p>El bot ya está conectado a WhatsApp.</p>';
                 document.getElementById('status').textContent = '✅ Dispositivo conectado';
               } else if (data.hasQR) {
-                fetch('/qr.png').then(() => {
-                  document.getElementById('content').innerHTML = '<img alt="QR" src="/qr.png?t=' + Date.now() + '"/>';
-                  document.getElementById('status').textContent = '📷 Escanea el QR para conectar' + (data.lastQrAt ? ' • ' + new Date(data.lastQrAt).toLocaleString() : '');
-                }).catch(() => {
-                  document.getElementById('status').textContent = '⏳ Esperando QR...';
-                });
+                document.getElementById('content').innerHTML = '<img alt="QR" src="/qr.png?t=' + Date.now() + '"/>';
+                document.getElementById('status').textContent = '📷 Escanea el QR para conectar' + (data.lastQrAt ? ' • ' + new Date(data.lastQrAt).toLocaleString() : '');
+              } else {
+                document.getElementById('status').textContent = '⏳ Esperando QR...';
+                document.getElementById('content').innerHTML = '<p>Sin QR por ahora, recargando...</p>';
               }
+            })
+            .catch(err => {
+              document.getElementById('status').textContent = '⚠️ Error conectando al servidor';
+              console.error('Error:', err);
             });
         }, 2000);
+      </script>
       </script>
       </body></html>`;
       res.end(html);
